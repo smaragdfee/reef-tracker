@@ -10,7 +10,7 @@ export function ParamCard({ param, value, onChange, history }) {
 
   return (
     <div
-      className="rounded-2xl p-5 flex flex-col gap-3"
+  className="rounded-2xl p-5 flex flex-col gap-3 mx-1"
       style={{
         backgroundColor: "var(--color-deep)",
         border: "1px solid rgba(255,255,255,0.06)",

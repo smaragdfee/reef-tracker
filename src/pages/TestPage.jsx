@@ -9,7 +9,7 @@ export function TestPage({ values, history, saved, hasValues, handleChange, hand
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 px-1">
       <SummaryBanner values={values} />
 
       {PARAMETERS.map((param) => (

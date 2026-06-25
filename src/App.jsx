@@ -13,8 +13,7 @@ export default function App() {
       style={{ backgroundColor: "var(--color-abyssal)" }}
     >
       {/* Header */}
-      <div
-        className="px-5 pt-8 pb-5 flex items-center justify-between"
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div className="flex items-center gap-3">
@@ -41,7 +40,7 @@ export default function App() {
       </div>
 
       {/* Navigation */}
-      <div className="px-5 pt-4 pb-2">
+      <div style={{ padding: "12px 16px 8px 16px" }}>
         <div
           className="flex rounded-xl p-1 gap-1"
           style={{ backgroundColor: "var(--color-deep)" }}
@@ -76,7 +75,7 @@ border: activeView === tab.id
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-10 pt-4 max-w-2xl mx-auto">
+     <div style={{ padding: "16px 16px 40px 16px", maxWidth: "640px", margin: "0 auto" }}>
         {activeView === "test" && (
           <TestPage
             values={values}
