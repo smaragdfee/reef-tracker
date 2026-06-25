@@ -9,7 +9,7 @@ export function TestPage({ values, history, saved, hasValues, handleChange, hand
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <SummaryBanner values={values} />
 
       {PARAMETERS.map((param) => (
@@ -25,11 +25,16 @@ export function TestPage({ values, history, saved, hasValues, handleChange, hand
       {hasValues && (
         <button
           onClick={() => handleSave(today)}
-          className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-all ${
-            saved
-              ? "bg-emerald-600 text-white"
-              : "bg-blue-600 hover:bg-blue-500 text-white"
-          }`}
+          className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all mt-2"
+          style={{
+            fontFamily: "var(--font-heading)",
+            backgroundColor: saved
+              ? "var(--color-reef)"
+              : "var(--color-bioluminescent)",
+            color: saved
+              ? "var(--color-salt-mist)"
+              : "var(--color-abyssal)",
+          }}
         >
           {saved ? "✓ Gespeichert" : "Messung speichern"}
         </button>
