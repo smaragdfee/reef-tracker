@@ -5,33 +5,61 @@ import { TestPage } from "./pages/TestPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { AquariumSelector } from "./components/AquariumSelector";
+import { Sidebar } from "./components/Sidebar";
+import { AdditiveTracker } from "./components/AdditiveTracker";
+import { SaltCalculator } from "./pages/calculators/SaltCalculator";
+
+function PlaceholderPage({ icon, label }) {
+  return (
+    <div style={{ textAlign: "center", paddingTop: "72px" }}>
+      <div style={{ fontSize: "48px", marginBottom: "16px" }}>{icon}</div>
+      <p
+        style={{
+          fontFamily: "var(--font-heading)",
+          color: "var(--color-salt-mist)",
+          fontSize: "18px",
+          fontWeight: "600",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+      </p>
+      <p style={{ fontFamily: "var(--font-body)", color: "var(--color-deep-mist)", fontSize: "14px" }}>
+        Diese Funktion ist noch in Entwicklung.
+      </p>
+    </div>
+  );
+}
 
 export default function App() {
   const [activeView, setActiveView] = useState("test");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const { values, history, saved, hasValues, handleChange, handleSave } = useWaterTests();
-  const {
-    aquariums,
-    activeAquarium,
-    loading,
-    setActiveId,
-    addAquarium,
-    deleteAquarium,
-  } = useAquariums();
 
-  // Ladescreen
+  const { aquariums, activeAquarium, loading, setActiveId, addAquarium } = useAquariums();
+  const {
+    addMeasurement,
+    updateMeasurement,
+    deleteMeasurement,
+    getMeasurementsByAquarium,
+  } = useWaterTests(activeAquarium?.id);
+
   if (loading) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "var(--color-abyssal)" }}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#071826",
+        }}
       >
-        <span className="text-4xl">🪸</span>
+        <span style={{ fontSize: "40px" }}>🪸</span>
       </div>
     );
   }
 
-  // Onboarding – kein Aquarium vorhanden oder neu anlegen
   if (aquariums.length === 0 || showOnboarding) {
     return (
       <OnboardingPage
@@ -43,31 +71,89 @@ export default function App() {
     );
   }
 
+  function renderView() {
+    switch (activeView) {
+      case "test":
+        return (
+          <TestPage
+            measurements={getMeasurementsByAquarium(activeAquarium?.id)}
+            addMeasurement={addMeasurement}
+            aquariumId={activeAquarium?.id}
+          />
+        );
+      case "history":
+        return (
+          <HistoryPage
+            measurements={getMeasurementsByAquarium(activeAquarium?.id)}
+            deleteMeasurement={deleteMeasurement}
+            updateMeasurement={updateMeasurement}
+          />
+        );
+      case "dashboard":
+        return <PlaceholderPage icon="🏠" label="Dashboard" />;
+      case "bestand":
+        return <PlaceholderPage icon="🐠" label="Bestand" />;
+      case "technik":
+        return <PlaceholderPage icon="🔧" label="Technik" />;
+      case "rechner":
+        return <SaltCalculator />;
+      case "erinnerungen":
+        return <AdditiveTracker />;
+      case "einstellungen":
+        return <PlaceholderPage icon="⚙️" label="Einstellungen" />;
+      default:
+        return <PlaceholderPage icon="🚧" label="Kommt bald" />;
+    }
+  }
+
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--color-abyssal)" }}
-    >
+    <div style={{ minHeight: "100vh", backgroundColor: "#071826" }}>
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeView={activeView}
+        onNavigate={setActiveView}
+      />
+
       {/* Header */}
       <div
-        className="flex items-center justify-between"
         style={{
-          padding: "16px 16px 12px 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "16px 16px 12px",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🪸</span>
-          <span
-            className="text-base font-semibold"
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
             style={{
-              fontFamily: "var(--font-heading)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
               color: "var(--color-salt-mist)",
-              letterSpacing: "-0.02em",
+              fontSize: "20px",
+              lineHeight: "1",
+              padding: "2px 4px",
             }}
           >
-            Atolliq
-          </span>
+            ☰
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "18px" }}>🪸</span>
+            <span
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--color-salt-mist)",
+                fontSize: "15px",
+                fontWeight: "600",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Atolliq
+            </span>
+          </div>
         </div>
 
         <AquariumSelector
@@ -78,57 +164,9 @@ export default function App() {
         />
       </div>
 
-      {/* Navigation */}
-      <div style={{ padding: "12px 16px 8px 16px" }}>
-        <div
-          className="flex rounded-xl p-1 gap-1"
-          style={{ backgroundColor: "var(--color-deep)" }}
-        >
-          {[
-            { id: "test", label: "Wassertest" },
-            { id: "history", label: "Verlauf" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveView(tab.id)}
-              className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                fontFamily: "var(--font-heading)",
-                backgroundColor:
-                  activeView === tab.id
-                    ? "rgba(29, 206, 138, 0.15)"
-                    : "transparent",
-                color:
-                  activeView === tab.id
-                    ? "var(--color-bioluminescent)"
-                    : "var(--color-deep-mist)",
-                border:
-                  activeView === tab.id
-                    ? "1px solid rgba(29, 206, 138, 0.3)"
-                    : "1px solid transparent",
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Content */}
-      <div style={{ padding: "16px 16px 40px 16px", maxWidth: "640px", margin: "0 auto" }}>
-        {activeView === "test" && (
-          <TestPage
-            values={values}
-            history={history}
-            saved={saved}
-            hasValues={hasValues}
-            handleChange={handleChange}
-            handleSave={handleSave}
-          />
-        )}
-        {activeView === "history" && (
-          <HistoryPage history={history} />
-        )}
+      <div style={{ padding: "16px 16px 40px", maxWidth: "640px", margin: "0 auto" }}>
+        {renderView()}
       </div>
     </div>
   );
