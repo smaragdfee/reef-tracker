@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useAuth } from "./hooks/useAuth";
 import { useWaterTests } from "./hooks/useWaterTests";
 import { useAquariums } from "./hooks/useAquariums";
+import { AuthPage } from "./pages/AuthPage";
 import { TestPage } from "./pages/TestPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
@@ -36,15 +38,16 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const { aquariums, activeAquarium, loading, setActiveId, addAquarium } = useAquariums();
+  const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
+  const { aquariums, activeAquarium, loading, setActiveId, addAquarium } = useAquariums(user?.id);
   const {
     addMeasurement,
     updateMeasurement,
     deleteMeasurement,
     getMeasurementsByAquarium,
-  } = useWaterTests(activeAquarium?.id);
+  } = useWaterTests(activeAquarium?.id, user?.id);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div
         style={{
@@ -58,6 +61,10 @@ export default function App() {
         <span style={{ fontSize: "40px" }}>🪸</span>
       </div>
     );
+  }
+
+  if (!user) {
+    return <AuthPage signIn={signIn} signUp={signUp} />;
   }
 
   if (aquariums.length === 0 || showOnboarding) {
@@ -156,12 +163,30 @@ export default function App() {
           </div>
         </div>
 
-        <AquariumSelector
-          aquariums={aquariums}
-          activeAquarium={activeAquarium}
-          onSelect={setActiveId}
-          onAdd={() => setShowOnboarding(true)}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <AquariumSelector
+            aquariums={aquariums}
+            activeAquarium={activeAquarium}
+            onSelect={setActiveId}
+            onAdd={() => setShowOnboarding(true)}
+          />
+          <button
+            onClick={signOut}
+            title="Abmelden"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--color-deep-mist)",
+              fontSize: "16px",
+              lineHeight: "1",
+              padding: "4px",
+              opacity: 0.7,
+            }}
+          >
+            ↪
+          </button>
+        </div>
       </div>
 
       {/* Content */}
